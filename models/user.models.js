@@ -28,11 +28,24 @@ const userSchema = new mongoose.Schema({
         enum: ["admin", "user"],
         default: "user"
     },
-    profileImage: {
-        type: String
+    profilePhoto:{
+        type:String,
+        default:""
+    },
+    phone: {
+        type: Number,
+        required: true,
+        trim: true,
+        minlength: 10,
+        maxlength: 15
     },
     lastLogin: {
         type: Date
+    },
+     gender:{
+        type:String,
+        required:true,
+        enum:["male","female"],
     },
     enrolledCourses: 
     [{ 

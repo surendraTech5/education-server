@@ -1,0 +1,4 @@
+Lecture → belongs to 1 Course and 1 Subject
+Course → has many Subjects
+Subject → independent, linked to User
+All schemas are properly related to User
