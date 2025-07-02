@@ -78,6 +78,7 @@ const getCoursesFilterPage = async(req,res)=>{
     const page = parseInt(req.query.page) || 1;
     const courseName = req.query.courseName || "";
     const createdBy = req.query.createdBy || ""; 
+    const subjectId = req.query.subjectId || "";
     const limit = 20;
     const skip = (page - 1) * limit;
     const query = {};
@@ -87,6 +88,9 @@ const getCoursesFilterPage = async(req,res)=>{
     }
     if (createdBy) {
       query.createdBy = createdBy;
+    }
+    if (subjectId) {
+      query.subjects = subjectId;
     }
 
 
@@ -126,4 +130,76 @@ const getCoursesFilterPage = async(req,res)=>{
     })
   }
 }
-module.exports = { courseCreate,getAllCourses,getCoursesFilterPage };
+
+const updateCourceById = async (req, res) => {
+  console.log("subject:::",req.body)
+  try {
+    const courseId = req.params.id;
+    const { 
+      courseName,
+      description,
+      price,
+      discount,
+      isActiveDiscount,
+      isFree,
+      isPaid,
+      duration,
+      classes,
+      isActive } = req.body;
+
+    if (!courseId) {
+      return res.status(400).json({
+        status: false,
+        message: "CourseId ID is required",
+      });
+    }
+
+    const updateFields = {};
+    if (courseName !== undefined) updateFields.courseName = courseName;
+    if (description !== undefined) updateFields.description = description;
+    if (price !== undefined) updateFields.price = price;
+    if (discount !== undefined) updateFields.discount = discount;
+    if (isActiveDiscount !== undefined) updateFields.isActiveDiscount = isActiveDiscount;
+    if (isFree !== undefined) updateFields.isFree = isFree;
+    if (isPaid !== undefined) updateFields.isPaid = isPaid;
+    if (duration !== undefined) updateFields.duration = duration;
+    if (classes !== undefined) updateFields.classes = classes;
+    if (isActive !== undefined) updateFields.isActive = isActive;
+    // if (medium !== undefined) updateFields.medium = medium;
+    // if (board !== undefined) updateFields.board = board;
+    // if (subjects !== undefined) updateFields.subjects = subjects;
+
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        status: false,
+        message: "At least one field is required to update",
+      });
+    }
+
+    const updatedCourse = await courseModel.findByIdAndUpdate(courseId, updateFields, {
+      new: true,
+    });
+    console.log("updatedSubject",updatedCourse)
+
+      if (!updatedCourse) {
+      return res.status(404).json({
+        status: false,
+        message: "Course not found",
+      });
+    }
+
+    return res.status(200).json({
+       status: true,
+      message: "Course updated successfully",
+      data: updatedCourse,
+    });
+  } catch (err) {
+    return res.status(500).json({
+       status: false,
+      message: "Error updating course",
+      error: err.message,
+    });
+  }
+};
+module.exports = { courseCreate,getAllCourses,getCoursesFilterPage,updateCourceById };

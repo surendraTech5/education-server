@@ -77,36 +77,57 @@ const getAllLecture= async (req,res) => {
     })
   }
 }
-
 const getLectureWithPage = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 20;
     const skip = (page - 1) * limit;
 
-    const [lectures, totalLectures] = await Promise.all([
-      lectureModels
-        .find({})
-        .populate("courseId", "courseName")
-        .populate("subjectId")
-        .populate("createdBy", "firstName lastName email")
-        .select("-notes -additionalDocuments -__v")
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 }),
-      lectureModels.countDocuments(),
-    ]);
+    const { courseId, subjectId, createdBy, lectureName = "" } = req.query;
+    const query = {};
+
+     if (lectureName) {
+      const regex = new RegExp(lectureName, 'i');
+      query.lectureName = regex;
+    }
+
+    if (courseId) query.courseId = courseId;
+    if (subjectId) query.subjectId = subjectId;
+    if (createdBy) query.createdBy = createdBy;
+
+    const lectures = await lectureModels
+      .find(query)
+      .populate("courseId", "courseName")
+      .populate("subjectId")
+      .populate("createdBy", "firstName lastName email")
+      // .select("-notes -additionalDocuments -__v")
+      .select(" -__v")
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const totalLecture = await lectureModels.countDocuments(query);
+
+    if (!lectures.length) {
+      return res.status(200).json({
+        success: true,
+        message: "No Data Found!!",
+        lectures: [],
+        totalPages: 0,
+        currentPage: page,
+      });
+    }
 
     res.status(200).json({
-      status: true,
+      success: true,
       message: "Lectures fetched successfully",
       lectures,
-      totalPages: Math.ceil(totalLectures / limit),
+      totalPages: Math.ceil(totalLecture / limit),
       currentPage: page,
     });
   } catch (error) {
-    res.status(500).json({
-      status: false,
+    res.status(501).json({
+      success: false,
       message: "Error fetching lectures",
       error: error.message,
     });
