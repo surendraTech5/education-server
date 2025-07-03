@@ -1,6 +1,7 @@
 const UserModel = require("../models/user.models");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const uploadToCloudinary = require("../config/uploadToCloudinary");
 
 const userRegister = async (req, res) => {
   try {
@@ -121,4 +122,40 @@ const getAllUsers = async(req,res)=>{
   }
  
 }
-module.exports = { userRegister, userLogin,getAllAdminUser,getAllUsers };
+
+const updateUserById = async (req, res) => {
+  try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);   
+    const userId = req.params.id;
+    const { firstName, lastName, gender, phone } = req.body;
+    let updateFields = { firstName, lastName, gender, phone };
+     if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer, "profilePhotos", "image");
+      updateFields.profilePhoto = result.secure_url;
+    }
+     const updatedUser = await UserModel.findByIdAndUpdate(
+      userId,
+      updateFields,
+      { new: true }
+    );
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      updatedUser,
+    });
+  } catch (error) {
+     res.status(501).json({
+      success: false,
+      message: "Error in updating user",
+      error: error.message,
+    });
+  }
+}
+module.exports = { userRegister, userLogin,getAllAdminUser,getAllUsers,updateUserById };
