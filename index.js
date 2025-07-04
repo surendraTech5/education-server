@@ -7,6 +7,7 @@ const courseRoutes = require('./routes/courses.router');
 const lectureRoutes = require('./routes/lecture.router');
 const subjectRotees = require('./routes/subject.router')
 const dashboardRoutes  = require("./routes/dashboard.route")
+const studentRoutes = require('./routes/student.router');
 const cors = require('cors');
 
 const app=express();
@@ -23,6 +24,7 @@ app.use('/api/course', courseRoutes);
 app.use('/api/lecture',lectureRoutes);
 app.use('/api/subject', subjectRotees);
 app.use("/api/dashboard", dashboardRoutes);
+app.use('/api/student', studentRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
