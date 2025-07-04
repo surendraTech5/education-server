@@ -11,7 +11,13 @@ const {
   getLecturesByCourseId,
   getLecturesByCourseAndSubject,
   getSubjectByLectureId,
+  getStudentById,
+  createStudent,
+  getAllStudents,
+  updateStudent,
+  deleteStudent,
 } = require("../controller/student.controller");
+const { requireSignIn, isAdmin } = require("../middlewear/auth.middlewaer");
 
 const router = express.Router();
 
@@ -31,5 +37,14 @@ router.get("/lectures/:lectureId/subject", getSubjectByLectureId);
 router.get("/lectures", getAllLectures);
 router.get("/lectures/:id", getLectureById);
 router.get("/subjects/:subjectId/lectures", getLecturesBySubjectId);
+
+
+//StudentMGMT
+
+router.post("/create", requireSignIn, isAdmin, createStudent);
+router.get("/get-all", requireSignIn, isAdmin, getAllStudents);
+router.get("/get/:id", requireSignIn, isAdmin, getStudentById);
+router.put("/update/:id", requireSignIn, isAdmin, updateStudent);
+router.delete("/delete/:id", requireSignIn, isAdmin, deleteStudent);
 
 module.exports = router;
